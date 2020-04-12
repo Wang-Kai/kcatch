@@ -87,7 +87,7 @@ func (c *Cache) gc() {
 	}
 }
 
-// worker will
+// worker will implement LRU
 func (c *Cache) worker() {
 	for {
 		select {
@@ -120,8 +120,7 @@ func (c *Cache) worker() {
 }
 
 func (c *Cache) Get(key string) *Item {
-	bucket := c.bucket(key)
-	val, ok := bucket.Load(key)
+	val, ok := c.bucket(key).Load(key)
 	if !ok {
 		return nil
 	}
@@ -166,7 +165,7 @@ func (c *Cache) Set(key string, value interface{}) *Item {
 		c.deleteChan <- oldItem
 	}
 
-	c.bucket(key).Store(key, item)
+	bucket.Store(key, item)
 
 	// promote new item on link
 	c.promoteChan <- item
